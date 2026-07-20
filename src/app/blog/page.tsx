@@ -1,17 +1,46 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
-import { getPublishedPosts } from '@/lib/blog-data';
+import Image from 'next/image';
+import { getPosts, formatDate, BlogPost as APIPost } from '@/lib/api';
+import { blogPosts as localPosts } from '@/lib/blog-data';
 
-// Revalidate every 24 hours (86400 seconds) so scheduled posts surface automatically
-export const revalidate = 86400;
+// Site domain for API calls
+const SITE_DOMAIN = 'westhollywoodbarbers.com';
 
 export const metadata: Metadata = {
   title: 'Blog',
-  description: 'Tips, insights, and guides from West Hollywood Barbers. Learn about haircuts, grooming, and barbershop culture.',
+  description: 'Expert barbering tips, style guides, and grooming advice from West Hollywood Barbers.',
 };
 
-export default function BlogPage() {
-  const publishedPosts = getPublishedPosts();
+// Merge API posts with local posts, preferring API
+async function getAllPosts() {
+  const apiPosts = await getPosts(SITE_DOMAIN);
+  
+  // If we have API posts, use them
+  if (apiPosts.length > 0) {
+    return apiPosts.map(post => ({
+      slug: post.slug,
+      title: post.title,
+      excerpt: post.excerpt || '',
+      image: post.image_url,
+      category: post.category || 'Barbers',
+      date: formatDate(post.publish_at || post.created_at),
+    }));
+  }
+  
+  // Fallback to local posts
+  return localPosts.map(post => ({
+    slug: post.slug,
+    title: post.title,
+    excerpt: post.excerpt,
+    image: post.image,
+    category: post.category,
+    date: post.date,
+  }));
+}
+
+export default async function BlogPage() {
+  const posts = await getAllPosts();
 
   return (
     <div>
@@ -25,72 +54,52 @@ export default function BlogPage() {
         }}
       >
         <div className="max-w-4xl mx-auto px-4 pt-16">
-          <h1 className="text-4xl md:text-5xl font-serif text-white mb-4">Blog</h1>
-          <p className="text-white text-lg">Tips, insights, and grooming guides from West Hollywood Barbers</p>
+          <h1 className="text-4xl md:text-5xl font-serif text-white mb-4">
+            Blog
+          </h1>
+          <p className="text-lg text-stone-300">
+            Expert barbering tips, style guides, and grooming advice
+          </p>
         </div>
       </section>
 
-      {/* Blog Posts */}
+      {/* Blog Posts Grid */}
       <section className="py-16 bg-stone-100">
         <div className="max-w-7xl mx-auto px-4">
-          <div className="grid md:grid-cols-2 gap-8">
-            {publishedPosts.map((post) => (
-              <article key={post.slug} className="bg-white shadow-lg overflow-hidden">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {posts.map((post) => (
+              <Link
+                key={post.slug}
+                href={`/blog/${post.slug}`}
+                className="bg-white shadow-lg overflow-hidden group hover:shadow-xl transition-shadow"
+              >
                 {post.image && (
-                  <img 
-                    src={post.image} 
-                    alt={post.title}
-                    className="w-full h-64 object-cover"
-                  />
+                  <div className="relative h-48 overflow-hidden">
+                    <Image
+                      src={post.image}
+                      alt={post.title}
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                  </div>
                 )}
                 <div className="p-6">
-                  <div className="flex items-center text-sm text-gray-500 mb-2">
-                    <span>{post.category}</span>
-                    <span className="mx-2">|</span>
-                    <span>{post.date}</span>
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-xs text-orange-600 uppercase tracking-wider font-medium">
+                      {post.category}
+                    </span>
+                    <span className="text-xs text-gray-400">•</span>
+                    <span className="text-xs text-gray-500">{post.date}</span>
                   </div>
-                  <Link href={`/blog/${post.slug}`}>
-                    <h2 className="text-xl font-serif text-gray-900 mb-3 hover:text-orange-600 transition-colors">
-                      {post.title}
-                    </h2>
-                  </Link>
-                  <p className="text-gray-600 text-sm mb-4">{post.excerpt}</p>
-                  <Link
-                    href={`/blog/${post.slug}`}
-                    className="text-orange-600 text-sm font-medium hover:text-orange-700 transition-colors"
-                  >
-                    Read More →
-                  </Link>
+                  <h2 className="text-xl font-serif text-gray-900 mb-2 group-hover:text-orange-600 transition-colors">
+                    {post.title}
+                  </h2>
+                  <p className="text-gray-600 text-sm line-clamp-2">
+                    {post.excerpt}
+                  </p>
                 </div>
-              </article>
+              </Link>
             ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Contact Section */}
-      <section className="py-16 bg-stone-100">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="grid md:grid-cols-2 gap-12">
-            <div>
-              <h3 className="text-xl font-serif text-gray-900 mb-4">Visit Us</h3>
-              <p className="text-gray-600">369 N Fairfax Ave</p>
-              <p className="text-gray-600">Unit A</p>
-              <p className="text-gray-600">Los Angeles, CA 90036</p>
-            </div>
-            <div>
-              <h3 className="text-xl font-serif text-gray-900 mb-4">Get In Touch</h3>
-              <p className="text-gray-600 mb-2">
-                <a href="tel:+13235181007" className="hover:text-orange-600">
-                  <strong>(323)</strong> <strong>518-1007</strong>
-                </a>
-              </p>
-              <p className="text-gray-600">
-                <a href="mailto:info@westhollywoodbarbers.com" className="hover:text-orange-600">
-                  info@westhollywoodbarbers.com
-                </a>
-              </p>
-            </div>
           </div>
         </div>
       </section>
