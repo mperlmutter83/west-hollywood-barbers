@@ -3,6 +3,9 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getPostBySlug, getAllPostSlugs } from '@/lib/blog-data';
 
+// Revalidate every 24 hours (86400 seconds) so scheduled posts surface automatically
+export const revalidate = 86400;
+
 interface Props {
   params: Promise<{ slug: string }>;
 }
@@ -20,9 +23,18 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     return { title: 'Post Not Found' };
   }
 
+  const title = post.seoTitle ?? post.title;
+  const description = post.metaDescription ?? post.excerpt;
+
   return {
-    title: post.title,
-    description: post.excerpt,
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      type: 'article',
+      publishedTime: post.publishedAt,
+    },
   };
 }
 
@@ -107,15 +119,17 @@ export default async function BlogPostPage({ params }: Props) {
       </section>
 
       {/* Featured Image */}
-      <section className="bg-stone-100">
-        <div className="max-w-4xl mx-auto px-4">
-          <img 
-            src={post.image} 
-            alt={post.title}
-            className="w-full h-96 object-cover -mt-8 shadow-lg"
-          />
-        </div>
-      </section>
+      {post.image && (
+        <section className="bg-stone-100">
+          <div className="max-w-4xl mx-auto px-4">
+            <img 
+              src={post.image} 
+              alt={post.title}
+              className="w-full h-96 object-cover -mt-8 shadow-lg"
+            />
+          </div>
+        </section>
+      )}
 
       {/* Content */}
       <section className="py-12 bg-stone-100">

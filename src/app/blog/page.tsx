@@ -1,6 +1,9 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
-import { blogPosts } from '@/lib/blog-data';
+import { getPublishedPosts } from '@/lib/blog-data';
+
+// Revalidate every 24 hours (86400 seconds) so scheduled posts surface automatically
+export const revalidate = 86400;
 
 export const metadata: Metadata = {
   title: 'Blog',
@@ -8,6 +11,8 @@ export const metadata: Metadata = {
 };
 
 export default function BlogPage() {
+  const publishedPosts = getPublishedPosts();
+
   return (
     <div>
       {/* Hero Section */}
@@ -29,13 +34,15 @@ export default function BlogPage() {
       <section className="py-16 bg-stone-100">
         <div className="max-w-7xl mx-auto px-4">
           <div className="grid md:grid-cols-2 gap-8">
-            {blogPosts.map((post) => (
+            {publishedPosts.map((post) => (
               <article key={post.slug} className="bg-white shadow-lg overflow-hidden">
-                <img 
-                  src={post.image} 
-                  alt={post.title}
-                  className="w-full h-64 object-cover"
-                />
+                {post.image && (
+                  <img 
+                    src={post.image} 
+                    alt={post.title}
+                    className="w-full h-64 object-cover"
+                  />
+                )}
                 <div className="p-6">
                   <div className="flex items-center text-sm text-gray-500 mb-2">
                     <span>{post.category}</span>
