@@ -3,6 +3,7 @@ import { Playfair_Display, Open_Sans } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { getHours, hoursToSchema } from '@/lib/hours';
 
 const playfair = Playfair_Display({
   variable: "--font-playfair",
@@ -31,11 +32,12 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const hours = await getHours();
   return (
     <html lang="en">
       <head>
@@ -70,7 +72,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
               },
               "url": "https://westhollywoodbarbers.com",
               "priceRange": "$$",
-              "openingHours": "Mo-Su",
+              "openingHoursSpecification": hoursToSchema(hours),
               "areaServed": ["West Hollywood", "Los Angeles", "WeHo"]
             }),
           }}
