@@ -41,6 +41,22 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <head>
+        {/* RFM site data - pushed before GTM loads */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `window.dataLayer = window.dataLayer || [];
+window.dataLayer.push({
+  rfm: {
+    schema_version: "1.0",
+    site_id: "west_hollywood_barbers",
+    provider_id: "3deaf7f3-8708-4126-9f88-d94c737f9ab2",
+    provider_name: "West Hollywood Barbers",
+    service_category: "barber",
+    market: "west_hollywood"
+  }
+});`,
+          }}
+        />
         {/* Google Tag Manager */}
         <script
           dangerouslySetInnerHTML={{
