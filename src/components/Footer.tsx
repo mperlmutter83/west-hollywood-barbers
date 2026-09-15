@@ -8,6 +8,13 @@ export default function Footer() {
           <p className="text-gray-400 text-sm mb-4 md:mb-0">
             Designed by West Hollywood Barbers
           </p>
+          <nav className="flex items-center space-x-4 mb-4 md:mb-0">
+            <Link href="/" className="text-gray-400 hover:text-white transition-colors text-sm">Home</Link>
+            <Link href="/about" className="text-gray-400 hover:text-white transition-colors text-sm">About</Link>
+            <Link href="/blog" className="text-gray-400 hover:text-white transition-colors text-sm">Blog</Link>
+            <Link href="/contact" className="text-gray-400 hover:text-white transition-colors text-sm">Contact</Link>
+            <Link href="/looking-for-work" className="text-gray-400 hover:text-white transition-colors text-sm">Looking for Work</Link>
+          </nav>
           <div className="flex items-center space-x-4">
             <a href="https://www.instagram.com/westhollywoodbarbers" className="text-gray-400 hover:text-white transition-colors">
               <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
